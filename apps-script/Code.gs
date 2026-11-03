@@ -52,10 +52,8 @@ const COLUMNS = [
 /* ---------- web app ---------- */
 
 function doGet() {
-  return HtmlService.createHtmlOutputFromFile('Index')
-    .setTitle('Vendor Registration (Logistics)')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  return ContentService.createTextOutput(JSON.stringify({ ok: true, service: 'Kasper vendor registration' }))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 // Used when the HTML is hosted outside Apps Script (fetch POST, text/plain JSON)
@@ -118,7 +116,12 @@ function submit(data) {
       return Array.isArray(v) ? v.join(', ') : (v == null ? '' : String(v));
     });
     // Prevent formula injection from user input
-    const safe = row.map(v => (typeof v === 'string' && /^[=+\-@]/.test(v)) ? "'" + v : v);
+    const TEXT_COLS = ['trn', 'trade_license_no', 'po_box', 'phone', 'fleet_size'];
+    const safe = row.map((v, i) => {
+      if (typeof v !== 'string') return v;
+      if (/^[=+\-@]/.test(v) || (TEXT_COLS.indexOf(COLUMNS[i][0]) > -1 && v !== '')) return "'" + v;
+      return v;
+    });
     // Keep phone numbers as text
     sheet.appendRow(safe);
 
