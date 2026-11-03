@@ -116,7 +116,7 @@ function submit(data) {
       return Array.isArray(v) ? v.join(', ') : (v == null ? '' : String(v));
     });
     // Prevent formula injection from user input
-    const TEXT_COLS = ['trn', 'trade_license_no', 'po_box', 'phone', 'fleet_size'];
+    const TEXT_COLS = ['trn', 'trade_license_no', 'po_box', 'phone'];
     const safe = row.map((v, i) => {
       if (typeof v !== 'string') return v;
       if (/^[=+\-@]/.test(v) || (TEXT_COLS.indexOf(COLUMNS[i][0]) > -1 && v !== '')) return "'" + v;
