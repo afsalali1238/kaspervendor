@@ -249,12 +249,13 @@
         </div>
 
         <div class="grid2">
-          <div class="field">
-            <label class="q" for="trade_license_no">Trade license number<small>optional</small></label>
+          <div class="field" data-req>
+            <label class="q" for="trade_license_no">Trade license number<span class="req">*</span></label>
             <input type="text" id="trade_license_no" name="trade_license_no">
+            <div class="err">Enter your trade license number.</div>
           </div>
-          <div class="field" data-pattern="^\d{15}$">
-            <label class="q" for="trn">TRN<small>optional · 15 digits</small></label>
+          <div class="field" data-req data-pattern="^\d{15}$">
+            <label class="q" for="trn">TRN<span class="req">*</span><small>15 digits</small></label>
             <input type="text" id="trn" name="trn" inputmode="numeric" maxlength="15">
             <div class="err">TRN must be exactly 15 digits.</div>
           </div>
@@ -266,10 +267,10 @@
           <div class="err">Upload a valid trade license.</div>
         </div>
 
-        <div class="field" data-file="vat_cert">
-          <div class="q">VAT registration certificate<small>optional</small></div>
+        <div class="field" data-req data-file="vat_cert">
+          <div class="q">VAT registration certificate (TRN)<span class="req">*</span></div>
           <label class="drop"><input type="file" accept=".pdf,.jpg,.jpeg,.png"><div class="ic">📄</div><div class="t"><b>Upload or drop file</b><em>PDF, JPG or PNG · max 10 MB</em></div></label>
-          <div class="err">File must be PDF, JPG or PNG under 10 MB.</div>
+          <div class="err">Upload your VAT registration certificate.</div>
         </div>
       </section>
 

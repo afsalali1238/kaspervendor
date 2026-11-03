@@ -73,7 +73,7 @@ function submit(data) {
   if (!data || typeof data !== 'object') throw new Error('No data received');
   if (data._hp) return { ok: true, ref: 'IGNORED' }; // honeypot = bot
 
-  const required = ['company_name', 'legal_status', 'vendor_type', 'address1', 'city', 'country',
+  const required = ['company_name', 'legal_status', 'trade_license_no', 'trn', 'vendor_type', 'address1', 'city', 'country',
     'coverage', 'fleet_size', 'payment_terms', 'delivery_logistics', 'payment_methods',
     'first_name', 'last_name', 'phone', 'email'];
   required.forEach(k => {
@@ -83,6 +83,8 @@ function submit(data) {
     }
   });
   if (!data.files || !data.files.trade_license) throw new Error('Trade license file is required');
+  if (!data.files.vat_cert) throw new Error('VAT certificate file is required');
+  if (!/^\d{15}$/.test(String(data.trn))) throw new Error('TRN must be 15 digits');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) throw new Error('Invalid email');
   ['decl_accurate', 'decl_laws', 'decl_rights'].forEach(k => {
     if (data[k] !== 'Yes') throw new Error('All declarations must be accepted');
