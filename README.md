@@ -1,8 +1,8 @@
 # Kasper Vendor Registration (Logistics)
 
-Live form: https://afsalali1238.github.io/kaspervendor/
+Hosted on Vercel (static site, no build step).
 
-- `index.html` — the form, served by GitHub Pages. Submissions are POSTed to the Apps Script web app set in `ENDPOINT`.
+- `index.html` — the form, served by Vercel. Submissions are POSTed to the Apps Script web app set in `ENDPOINT`.
 - `apps-script/Code.gs` — Google Sheets backend (writes rows, saves uploads to Drive).
 - `apps-script/Index.html` — same form, for serving directly from Apps Script (optional).
 
@@ -13,3 +13,9 @@ Live form: https://afsalali1238.github.io/kaspervendor/
 4. In `index.html`, set `var ENDPOINT = '<your /exec URL>';` and commit.
 
 When you change `Code.gs`, use Deploy → Manage deployments → Edit → New version (keeps the same URL).
+
+## Deploy on Vercel
+1. vercel.com → Add New → Project → import `afsalali1238/kaspervendor`.
+2. Framework preset: **Other**. Leave build command and output directory empty. Deploy.
+3. Every push to `main` redeploys automatically.
+4. Optional: Project → Settings → Domains → add e.g. `vendors.yourdomain.com`.
