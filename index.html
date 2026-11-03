@@ -133,9 +133,38 @@
   .review dd{margin:0;word-break:break-word}
 
   .alert{padding:12px 16px;border-radius:10px;background:#FDECEC;color:var(--danger);font-size:14px;margin-top:16px;display:none}
-  .done-wrap{text-align:center;padding:60px 0}
-  .done-wrap .badge{width:72px;height:72px;border-radius:50%;background:var(--brand);display:grid;place-items:center;margin:0 auto 20px}
-  .ref{display:inline-block;font-weight:700;background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:6px 12px;margin-top:8px;letter-spacing:.04em}
+  /* ===== Completion ===== */
+  .done{max-width:620px}
+  .done .hero{background:var(--ink);color:#fff;border-radius:18px;padding:36px 32px 30px;position:relative;overflow:hidden}
+  .done .mk{width:76px;height:76px;margin-bottom:22px}
+  .done .mk svg{width:100%;height:100%;overflow:visible}
+  .done .mk .f{transform-box:fill-box;transform-origin:center;opacity:0}
+  .done .mk .d{transform-box:fill-box;transform-origin:center;opacity:0}
+  .done .mk .ck{stroke-dasharray:60;stroke-dashoffset:60}
+  .done.play .mk .f{animation:iFrame .55s cubic-bezier(.2,.9,.3,1.2) .05s forwards}
+  .done.play .mk .d{animation:iDot .45s cubic-bezier(.3,1.6,.5,1) .4s forwards}
+  .done.play .mk .ck{animation:ck .35s ease .8s forwards}
+  @keyframes ck{to{stroke-dashoffset:0}}
+  .done .eyebrow{color:var(--brand)}
+  .done h2{color:#fff;font-size:30px;margin:6px 0 8px}
+  .done .hero p{color:#C9CBD0;margin:0;max-width:440px}
+  .done .refcard{display:flex;align-items:center;gap:12px;margin-top:24px;background:#1F2125;border:1px solid #33363C;border-radius:12px;padding:12px 14px}
+  .done .refcard small{display:block;color:#8D9097;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+  .done .refcard b{font-size:20px;letter-spacing:.06em;color:var(--brand);white-space:nowrap}
+  @media (max-width:480px){.done .refcard b{font-size:17px}.done .hero{padding:28px 22px 24px}.done h2{font-size:26px}}
+  .done .copy{margin-left:auto;background:var(--brand);color:var(--ink);border:0;border-radius:8px;padding:9px 14px;font:inherit;font-weight:700;font-size:13px;cursor:pointer}
+  .done .next{margin-top:28px}
+  .done .next h3{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+  .done ol{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+  .done ol li{display:flex;gap:14px;align-items:flex-start;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;opacity:0;transform:translateY(6px)}
+  .done.play ol li{animation:rise .4s ease forwards}
+  .done.play ol li:nth-child(1){animation-delay:1s}.done.play ol li:nth-child(2){animation-delay:1.12s}.done.play ol li:nth-child(3){animation-delay:1.24s}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .done ol li .n{width:28px;height:28px;border-radius:8px;background:var(--brand-soft);color:var(--ink);display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}
+  .done ol li b{display:block}
+  .done ol li span{color:var(--muted);font-size:14px}
+  .done .sign{margin-top:24px;font-size:13px;color:var(--muted)}
+  @media (prefers-reduced-motion: reduce){.done *{animation:none!important;opacity:1!important;transform:none!important;stroke-dashoffset:0!important}}
   .hp{position:absolute;left:-9999px}
 
   @media (max-width:900px){
@@ -448,11 +477,30 @@
       </section>
 
       <section class="step" id="doneStep" data-title="Done">
-        <div class="done-wrap">
-          <div class="badge"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#141518" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>
-          <h2>Registration received</h2>
-          <p class="sub" style="margin:0 auto;max-width:420px">Thank you. Our vendor team will review your details and get back to you within 2 working days.</p>
-          <div class="ref" id="refOut"></div>
+        <div class="done" id="doneCard">
+          <div class="hero">
+            <div class="mk"><svg viewBox="36 36 160 160" aria-hidden="true">
+              <path class="f" fill="#FFC400" d="M145.01 42.65L187.66 85.3L187.66 187.66L85.3 187.66L42.65 145.01L145.01 145.01Z"/>
+              <circle class="d" fill="#FFC400" cx="89.56" cy="89.56" r="46.91"/>
+              <path class="ck" d="M68 90l15 15 28-30" fill="none" stroke="#141518" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg></div>
+            <div class="eyebrow">Registration received</div>
+            <h2 id="doneTitle">You're in the queue.</h2>
+            <p id="doneMsg">Thanks for registering with Kasper. Our vendor team is reviewing your details now.</p>
+            <div class="refcard">
+              <div><small>Your reference</small><b id="refOut">—</b></div>
+              <button type="button" class="copy" id="copyRef">Copy</button>
+            </div>
+          </div>
+          <div class="next">
+            <h3>What happens next</h3>
+            <ol>
+              <li><span class="n">1</span><div><b>Document review</b><span>We verify your trade license and details within 2 working days.</span></div></li>
+              <li><span class="n">2</span><div><b>Quick call from our team</b><span>We confirm your fleet, rates and coverage with the authorized person.</span></div></li>
+              <li><span class="n">3</span><div><b>Go live on Kasper</b><span>You're onboarded to the marketplace and start receiving job requests.</span></div></li>
+            </ol>
+          </div>
+          <p class="sign">Keep your reference handy if you contact us.<br><b style="color:var(--text)">Kasper Technologies FZ-LLC</b> · in5 Tech · Internet City, Dubai</p>
         </div>
       </section>
 
@@ -670,7 +718,15 @@ function submit(){
     document.getElementById('nav').style.display='none';
     document.getElementById('bar').style.width='100%';
     Array.prototype.forEach.call(list.children, function(li){ li.className='done'; });
-    document.getElementById('refOut').textContent = 'Reference: ' + res.ref;
+    document.getElementById('refOut').textContent = res.ref;
+    var fn = (data.first_name || '').trim(), co = (data.company_name || '').trim();
+    if (fn) document.getElementById('doneTitle').textContent = 'Thanks, ' + fn + '. You\'re in the queue.';
+    if (co) document.getElementById('doneMsg').textContent = co + ' is now with our vendor team for review. We\'ll be in touch shortly.';
+    var card = document.getElementById('doneCard'); card.classList.remove('play'); void card.offsetWidth; card.classList.add('play');
+    document.getElementById('copyRef').onclick = function(){
+      var b = this; try { navigator.clipboard.writeText(res.ref).then(function(){ b.textContent = 'Copied'; setTimeout(function(){ b.textContent='Copy'; }, 1500); }); } catch(e){}
+    };
+    window.scrollTo({top:0, behavior:'smooth'});
   }
   function fail(msg){
     btn.disabled = false; btn.textContent = 'Submit registration';
