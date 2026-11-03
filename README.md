@@ -10,7 +10,7 @@ Hosted on Vercel (static site, no build step).
 1. New Google Sheet → Extensions → Apps Script → paste `apps-script/Code.gs`.
 2. Run `setup()` once and approve permissions.
 3. Deploy → New deployment → Web app → Execute as **Me**, access **Anyone** → copy the `/exec` URL.
-4. In `index.html`, set `var ENDPOINT = '<your /exec URL>';` and commit.
+4. In `index.html`, set `var ENDPOINT` to the `/exec` URL (already set to the live deployment).
 
 When you change `Code.gs`, use Deploy → Manage deployments → Edit → New version (keeps the same URL).
 

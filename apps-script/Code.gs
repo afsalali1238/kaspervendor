@@ -45,6 +45,7 @@ const COLUMNS = [
   ['designation', 'Designation'],
   ['phone', 'Phone'],
   ['email', 'Email'],
+  ['files_folder', 'All Files (Drive folder)'],
   ['status', 'Review Status'],
 ];
 
@@ -111,6 +112,7 @@ function submit(data) {
       if (key === 'submitted_at') return new Date();
       if (key === 'ref') return ref;
       if (key === 'status') return 'New';
+      if (key === 'files_folder') return folder.getUrl();
       if (links[key]) return links[key];
       const v = data[key];
       return Array.isArray(v) ? v.join(', ') : (v == null ? '' : String(v));
@@ -142,10 +144,10 @@ function setup() {
 function getSheet_() {
   const ss = SpreadsheetApp.getActive();
   let sh = ss.getSheetByName(SHEET_NAME);
-  if (!sh) sh = ss.insertSheet(SHEET_NAME);
+  if (!sh) sh = ss.insertSheet(SHEET_NAME, 0);
   if (sh.getLastRow() === 0) {
     sh.appendRow(COLUMNS.map(c => c[1]));
-    sh.getRange(1, 1, 1, COLUMNS.length).setFontWeight('bold').setBackground('#111111').setFontColor('#ffffff');
+    sh.getRange(1, 1, 1, COLUMNS.length).setFontWeight('bold').setBackground('#141518').setFontColor('#FFC400');
     sh.setFrozenRows(1);
     const phoneCol = COLUMNS.findIndex(c => c[0] === 'phone') + 1;
     sh.getRange(2, phoneCol, sh.getMaxRows() - 1, 1).setNumberFormat('@');
