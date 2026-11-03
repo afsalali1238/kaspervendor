@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vendor Registration (Logistics) · Kasper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ===== Brand tokens — swap here ===== */
+  :root{
+    --brand:#FFC400;          /* Kasper yellow */
+    --brand-press:#E6B000;
+    --brand-soft:#FFF6D6;
+    --ink:#141518;            /* Kasper ink */
+    --ink-2:#2A2C31;
+    --text:#141518;
+    --muted:#5E6169;
+    --line:#E3E4E8;
+    --bg:#F6F6F4;
+    --card:#FFFFFF;
+    --danger:#C62828;
+    --ok:#1E7D45;
+    --radius:12px;
+    --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:var(--font);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;font-size:15px;line-height:1.5}
+  .app{display:grid;grid-template-columns:340px 1fr;min-height:100vh}
+
+  /* Side panel */
+  .side{background:var(--ink);color:#fff;padding:36px 32px;position:sticky;top:0;height:100vh;align-self:start;display:flex;flex-direction:column}
+  .logo svg{width:150px;height:auto;display:block}
+  .side h1{font-size:26px;line-height:1.2;margin:40px 0 8px;font-weight:800;letter-spacing:-.02em}
+  .side p.lead{color:#B7B9BF;margin:0 0 32px;font-size:14px}
+  .steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+  .steps li{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:#8D9097;font-weight:500;font-size:14px;cursor:default;transition:.15s}
+  .steps li .n{width:26px;height:26px;border-radius:50%;border:1.5px solid #3A3D44;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}
+  .steps li.done{color:#D8D9DC;cursor:pointer}
+  .steps li.done .n{background:var(--brand);border-color:var(--brand);color:var(--ink)}
+  .steps li.active{background:var(--ink-2);color:#fff}
+  .steps li.active .n{border-color:var(--brand);color:var(--brand)}
+  .side .foot{margin-top:auto;font-size:12px;color:#6F727A}
+  .side .foot b{color:#B7B9BF;font-weight:600}
+
+  /* Main */
+  main{padding:48px clamp(20px,6vw,88px) 120px;max-width:820px;width:100%}
+  .progress{height:4px;background:var(--line);border-radius:4px;overflow:hidden;margin-bottom:36px}
+  .progress i{display:block;height:100%;background:var(--brand);width:0;transition:width .35s ease}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  h2{font-size:28px;margin:6px 0 6px;letter-spacing:-.02em;font-weight:800}
+  .sub{color:var(--muted);margin:0 0 28px}
+  section.step{display:none;animation:in .3s ease}
+  section.step.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .field{margin-bottom:22px}
+  .field[hidden]{display:none}
+  label.q,.q{display:block;font-weight:600;margin-bottom:8px;font-size:15px}
+  .q .req{color:var(--danger);margin-left:2px}
+  .q small{font-weight:400;color:var(--muted);margin-left:6px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+  input[type=text],input[type=email],input[type=tel],input[type=number],select,textarea{
+    width:100%;font:inherit;color:var(--text);background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;outline:none;transition:border .15s,box-shadow .15s}
+  input:focus,select:focus,textarea:focus{border-color:var(--ink);box-shadow:0 0 0 4px rgba(255,196,0,.35)}
+  .invalid input,.invalid select,.invalid .drop,.invalid .chips{border-color:var(--danger)!important}
+  .err{color:var(--danger);font-size:13px;margin-top:6px;display:none}
+  .invalid .err{display:block}
+  .hint{font-size:13px;color:var(--muted);margin-top:6px}
+
+  .phone{display:flex}
+  .phone span{display:grid;place-items:center;padding:0 14px;border:1.5px solid var(--line);border-right:0;border-radius:10px 0 0 10px;background:#EFEFEC;font-weight:600;color:var(--muted)}
+  .phone input{border-radius:0 10px 10px 0}
+
+  /* Chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;border:1.5px solid transparent;border-radius:12px}
+  .chip{position:relative}
+  .chip input{position:absolute;opacity:0;pointer-events:none}
+  .chip span{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border:1.5px solid var(--line);border-radius:999px;background:var(--card);cursor:pointer;font-weight:500;font-size:14px;user-select:none;transition:.12s}
+  .chip span:hover{border-color:#B9BBC2}
+  .chip input:checked+span{background:var(--ink);border-color:var(--ink);color:#fff}
+  .chip input:checked+span::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--brand)}
+  .chip input:focus-visible+span{box-shadow:0 0 0 4px rgba(255,196,0,.45)}
+  .linkbtn{background:none;border:0;padding:0;font:inherit;font-size:13px;color:var(--ink);text-decoration:underline;cursor:pointer;margin-top:8px}
+
+  /* Cards (vendor type / yes-no) */
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .cards.two{grid-template-columns:repeat(2,1fr);max-width:420px}
+  .card{position:relative}
+  .card input{position:absolute;opacity:0}
+  .card span{display:block;padding:16px;border:1.5px solid var(--line);border-radius:var(--radius);background:var(--card);cursor:pointer;height:100%;transition:.12s}
+  .card span b{display:block;font-size:15px}
+  .card span em{font-style:normal;color:var(--muted);font-size:13px}
+  .card input:checked+span{border-color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink);background:var(--brand-soft)}
+  .card input:focus-visible+span{box-shadow:0 0 0 4px rgba(255,196,0,.45)}
+
+  /* Upload */
+  .drop{border:1.5px dashed #C8CAD0;border-radius:var(--radius);background:var(--card);padding:20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:.15s}
+  .drop:hover,.drop.over{border-color:var(--ink);background:var(--brand-soft)}
+  .drop .ic{width:42px;height:42px;border-radius:10px;background:var(--bg);display:grid;place-items:center;flex:none}
+  .drop .t b{display:block}
+  .drop .t em{font-style:normal;color:var(--muted);font-size:13px}
+  .drop.has{border-style:solid;border-color:var(--ok)}
+  .drop.has .ic{background:#E5F4EA}
+  .drop input{display:none}
+  .x{margin-left:auto;background:none;border:0;font-size:20px;color:var(--muted);cursor:pointer;padding:4px 8px}
+
+  /* Declarations */
+  .decl{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1.5px solid var(--line);border-radius:var(--radius);background:var(--card);margin-bottom:10px;cursor:pointer}
+  .decl input{width:20px;height:20px;accent-color:var(--ink);margin-top:2px;flex:none}
+  .decl.invalid{border-color:var(--danger)}
+
+  /* Nav */
+  .nav{display:flex;gap:12px;align-items:center;margin-top:36px}
+  .btn{font:inherit;font-weight:700;border-radius:10px;padding:13px 22px;cursor:pointer;border:1.5px solid transparent;transition:.12s;display:inline-flex;align-items:center;gap:8px}
+  .btn.primary{background:var(--brand);color:var(--ink)}
+  .btn.primary:hover{background:var(--brand-press)}
+  .btn.ghost{background:transparent;border-color:var(--line);color:var(--text)}
+  .btn.ghost:hover{border-color:var(--ink)}
+  .btn:disabled{opacity:.6;cursor:wait}
+  .nav .kbd{font-size:12px;color:var(--muted);margin-left:auto}
+  .kbd kbd{font-family:inherit;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;background:#fff}
+
+  /* Review */
+  .review{background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .review .grp{padding:16px 20px;border-bottom:1px solid var(--line)}
+  .review .grp:last-child{border-bottom:0}
+  .review .gh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .review .gh b{font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+  .review dl{display:grid;grid-template-columns:200px 1fr;gap:6px 16px;margin:0;font-size:14px}
+  .review dt{color:var(--muted)}
+  .review dd{margin:0;word-break:break-word}
+
+  .alert{padding:12px 16px;border-radius:10px;background:#FDECEC;color:var(--danger);font-size:14px;margin-top:16px;display:none}
+  .done-wrap{text-align:center;padding:60px 0}
+  .done-wrap .badge{width:72px;height:72px;border-radius:50%;background:var(--brand);display:grid;place-items:center;margin:0 auto 20px}
+  .ref{display:inline-block;font-weight:700;background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:6px 12px;margin-top:8px;letter-spacing:.04em}
+  .hp{position:absolute;left:-9999px}
+
+  @media (max-width:900px){
+    .app{grid-template-columns:1fr}
+    .side{position:relative;height:auto;padding:20px}
+    .side h1,.side p.lead,.steps,.side .foot{display:none}
+    .logo svg{width:120px}
+    main{padding:28px 20px 100px}
+    .cards{grid-template-columns:1fr}
+    .grid2{grid-template-columns:1fr}
+    .review dl{grid-template-columns:1fr}
+    .review dt{margin-top:6px}
+    .nav .kbd{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="logo" aria-label="Kasper"><svg xmlns="http://www.w3.org/2000/svg" viewBox="36 36 836 200" role="img" aria-label="Kasper"><path fill="#FFC400" d="M145.01 42.65L187.66 85.3L187.66 187.66L85.3 187.66L42.65 145.01L145.01 145.01Z"></path><circle fill="#FFC400" cx="89.56" cy="89.56" r="46.91"></circle><path fill="#FFFFFF" d="M257.27 187.66L231.16 187.66L231.16 42.65L257.27 42.65L257.27 122.82L260.99 122.82L294.97 84.91L328.94 84.91L281.50 134.62L330.59 187.66L297.04 187.66L260.99 146.85L257.27 146.85L257.27 187.66ZM373.69 190.56L373.69 190.56Q362.71 190.56 354.00 186.73Q345.30 182.90 340.23 175.54Q335.16 168.19 335.16 157.62L335.16 157.62Q335.16 147.06 340.23 139.91Q345.30 132.77 354.31 129.14Q363.33 125.52 374.93 125.52L374.93 125.52L403.10 125.52L403.10 119.71Q403.10 112.47 398.54 107.81Q393.99 103.14 384.05 103.14L384.05 103.14Q374.30 103.14 369.54 107.60Q364.77 112.05 363.33 119.09L363.33 119.09L339.30 111.01Q341.78 103.14 347.28 96.61Q352.76 90.10 361.98 86.05Q371.19 82.01 384.46 82.01L384.46 82.01Q404.76 82.01 416.57 92.17Q428.37 102.31 428.37 121.58L428.37 121.58L428.37 159.90Q428.37 166.12 434.17 166.12L434.17 166.12L442.46 166.12L442.46 187.66L425.06 187.66Q417.40 187.66 412.42 183.94Q407.45 180.20 407.45 173.99L407.45 173.99L407.45 173.78L403.52 173.78Q402.69 176.26 399.78 180.31Q396.89 184.35 390.68 187.46Q384.46 190.56 373.69 190.56ZM378.24 169.43L378.24 169.43Q389.22 169.43 396.16 163.32Q403.10 157.20 403.10 147.06L403.10 147.06L403.10 144.99L376.80 144.99Q369.54 144.99 365.40 148.09Q361.25 151.20 361.25 156.79L361.25 156.79Q361.25 162.38 365.60 165.91Q369.95 169.43 378.24 169.43ZM499.22 190.56L499.22 190.56Q479.13 190.56 466.29 181.86Q453.45 173.15 450.75 157.00L450.75 157.00L474.77 150.78Q476.23 158.03 479.65 162.18Q483.06 166.32 488.14 168.08Q493.22 169.84 499.22 169.84L499.22 169.84Q508.34 169.84 512.69 166.64Q517.04 163.42 517.04 158.66L517.04 158.66Q517.04 153.89 512.89 151.30Q508.75 148.72 499.64 147.06L499.64 147.06L493.83 146.02Q483.06 143.95 474.16 140.32Q465.25 136.70 459.87 130.28Q454.47 123.85 454.47 113.71L454.47 113.71Q454.47 98.37 465.66 90.19Q476.84 82.01 495.08 82.01L495.08 82.01Q512.28 82.01 523.66 89.67Q535.06 97.34 538.58 109.77L538.58 109.77L514.35 117.23Q512.69 109.36 507.61 106.05Q502.53 102.72 495.08 102.72L495.08 102.72Q487.63 102.72 483.69 105.31Q479.75 107.90 479.75 112.47L479.75 112.47Q479.75 117.43 483.89 119.82Q488.04 122.20 495.08 123.44L495.08 123.44L500.88 124.48Q512.48 126.55 521.90 129.96Q531.32 133.38 536.82 139.71Q542.31 146.02 542.31 156.79L542.31 156.79Q542.31 172.95 530.60 181.76Q518.90 190.56 499.22 190.56ZM587.06 229.09L560.95 229.09L560.95 84.91L586.64 84.91L586.64 97.34L590.37 97.34Q593.89 91.34 601.35 86.67Q608.81 82.01 622.68 82.01L622.68 82.01Q635.12 82.01 645.68 88.12Q656.24 94.23 662.66 106.05Q669.09 117.85 669.09 134.62L669.09 134.62L669.09 137.94Q669.09 154.72 662.66 166.53Q656.24 178.33 645.68 184.44Q635.12 190.56 622.68 190.56L622.68 190.56Q613.36 190.56 607.05 188.38Q600.72 186.21 596.89 182.79Q593.06 179.37 590.78 175.85L590.78 175.85L587.06 175.85L587.06 229.09ZM614.82 167.77L614.82 167.77Q627.03 167.77 635.01 160.01Q642.99 152.24 642.99 137.32L642.99 137.32L642.99 135.25Q642.99 120.34 634.90 112.56Q626.83 104.79 614.82 104.79L614.82 104.79Q602.79 104.79 594.72 112.56Q586.64 120.34 586.64 135.25L586.64 135.25L586.64 137.32Q586.64 152.24 594.72 160.01Q602.79 167.77 614.82 167.77ZM735.79 190.56L735.79 190.56Q720.47 190.56 708.76 184.03Q697.06 177.50 690.53 165.60Q684.00 153.68 684.00 137.53L684.00 137.53L684.00 135.05Q684.00 118.89 690.42 106.97Q696.85 95.06 708.44 88.54Q720.04 82.01 735.38 82.01L735.38 82.01Q750.50 82.01 761.68 88.75Q772.88 95.48 779.09 107.38Q785.30 119.30 785.30 135.05L785.30 135.05L785.30 143.95L710.51 143.95Q710.94 154.52 718.39 161.14Q725.85 167.77 736.62 167.77L736.62 167.77Q747.60 167.77 752.78 163.01Q757.96 158.24 760.65 152.44L760.65 152.44L781.98 163.62Q779.09 169.02 773.60 175.33Q768.10 181.65 759.00 186.11Q749.88 190.56 735.79 190.56ZM710.73 124.48L710.73 124.48L758.79 124.48Q757.96 115.56 751.63 110.18Q745.32 104.79 735.16 104.79L735.16 104.79Q724.61 104.79 718.39 110.18Q712.18 115.56 710.73 124.48ZM830.46 187.66L804.36 187.66L804.36 84.91L830.04 84.91L830.04 96.52L833.78 96.52Q836.06 90.30 841.33 87.40Q846.62 84.49 853.66 84.49L853.66 84.49L866.09 84.49L866.09 107.70L853.25 107.70Q843.31 107.70 836.89 112.99Q830.46 118.26 830.46 129.24L830.46 129.24L830.46 187.66Z"></path></svg></div>
+    <h1>Vendor Registration</h1>
+    <p class="lead">Join the Kasper logistics network. Takes about 5 minutes — keep your trade license handy.</p>
+    <ol class="steps" id="stepList"></ol>
+    <div class="foot"><b>Kasper Technologies FZ-LLC</b><br>in5 Tech · Internet City, Dubai</div>
+  </aside>
+
+  <main>
+    <div class="progress"><i id="bar"></i></div>
+    <form id="f" novalidate autocomplete="on">
+      <input class="hp" type="text" name="_hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+      <!-- 1. Company -->
+      <section class="step" data-title="Company">
+        <div class="eyebrow">Step 1 of 6</div>
+        <h2>Company details</h2>
+        <p class="sub">As shown on your trade license.</p>
+
+        <div class="field" data-req>
+          <label class="q" for="company_name">Legal business name<span class="req">*</span></label>
+          <input type="text" id="company_name" name="company_name" autocomplete="organization">
+          <div class="err">Enter your company's legal name.</div>
+        </div>
+
+        <div class="field" data-req data-group="legal_status">
+          <div class="q">Legal status<span class="req">*</span></div>
+          <div class="chips" data-single>
+            <label class="chip"><input type="radio" name="legal_status" value="LLC"><span>LLC</span></label>
+            <label class="chip"><input type="radio" name="legal_status" value="Sole Establishment"><span>Sole Establishment</span></label>
+            <label class="chip"><input type="radio" name="legal_status" value="Free Zone Company"><span>Free Zone Company</span></label>
+            <label class="chip"><input type="radio" name="legal_status" value="Branch"><span>Branch</span></label>
+            <label class="chip"><input type="radio" name="legal_status" value="Civil Company"><span>Civil Company</span></label>
+            <label class="chip"><input type="radio" name="legal_status" value="Other" data-other="legal_status_other"><span>Other</span></label>
+          </div>
+          <input type="text" id="legal_status_other" placeholder="Specify legal status" hidden style="margin-top:10px">
+          <div class="err">Select your legal status.</div>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <label class="q" for="trade_license_no">Trade license number<small>optional</small></label>
+            <input type="text" id="trade_license_no" name="trade_license_no">
+          </div>
+          <div class="field" data-pattern="^\d{15}$">
+            <label class="q" for="trn">TRN<small>optional · 15 digits</small></label>
+            <input type="text" id="trn" name="trn" inputmode="numeric" maxlength="15">
+            <div class="err">TRN must be exactly 15 digits.</div>
+          </div>
+        </div>
+
+        <div class="field" data-req data-file="trade_license">
+          <div class="q">Trade license<span class="req">*</span></div>
+          <label class="drop"><input type="file" accept=".pdf,.jpg,.jpeg,.png"><div class="ic">📄</div><div class="t"><b>Upload or drop file</b><em>PDF, JPG or PNG · max 10 MB</em></div></label>
+          <div class="err">Upload a valid trade license.</div>
+        </div>
+
+        <div class="field" data-file="vat_cert">
+          <div class="q">VAT registration certificate<small>optional</small></div>
+          <label class="drop"><input type="file" accept=".pdf,.jpg,.jpeg,.png"><div class="ic">📄</div><div class="t"><b>Upload or drop file</b><em>PDF, JPG or PNG · max 10 MB</em></div></label>
+          <div class="err">File must be PDF, JPG or PNG under 10 MB.</div>
+        </div>
+      </section>
+
+      <!-- 2. Address -->
+      <section class="step" data-title="Address">
+        <div class="eyebrow">Step 2 of 6</div>
+        <h2>Registered office</h2>
+        <p class="sub">Your registered office address in the UAE.</p>
+        <div class="field" data-req>
+          <label class="q" for="address1">Address<span class="req">*</span></label>
+          <input type="text" id="address1" name="address1" placeholder="Building, street, area" autocomplete="address-line1">
+          <div class="err">Enter your address.</div>
+        </div>
+        <div class="field">
+          <label class="q" for="address2">Address line 2<small>optional</small></label>
+          <input type="text" id="address2" name="address2" placeholder="Office / unit number" autocomplete="address-line2">
+        </div>
+        <div class="grid2">
+          <div class="field" data-req>
+            <label class="q" for="city">Emirate<span class="req">*</span></label>
+            <select id="city" name="city">
+              <option value="">Select…</option>
+              <option>Abu Dhabi</option><option>Al Ain</option><option>Dubai</option><option>Sharjah</option>
+              <option>Ajman</option><option>Ras Al Khaimah</option><option>Umm Al Quwain</option><option>Fujairah</option>
+            </select>
+            <div class="err">Select an emirate.</div>
+          </div>
+          <div class="field">
+            <label class="q" for="po_box">P.O. Box<small>optional</small></label>
+            <input type="text" id="po_box" name="po_box" inputmode="numeric">
+          </div>
+        </div>
+        <div class="field" data-req>
+          <label class="q" for="country">Country<span class="req">*</span></label>
+          <input type="text" id="country" name="country" value="United Arab Emirates" autocomplete="country-name">
+          <div class="err">Enter country.</div>
+        </div>
+      </section>
+
+      <!-- 3. Fleet -->
+      <section class="step" data-title="Fleet & coverage">
+        <div class="eyebrow">Step 3 of 6</div>
+        <h2>Fleet &amp; coverage</h2>
+        <p class="sub">Tell us what you operate and where.</p>
+
+        <div class="field" data-req data-group="vendor_type">
+          <div class="q">Vendor type<span class="req">*</span></div>
+          <div class="cards">
+            <label class="card"><input type="radio" name="vendor_type" value="Heavy Equipment"><span><b>Heavy Equipment</b><em>Excavators, loaders, cranes…</em></span></label>
+            <label class="card"><input type="radio" name="vendor_type" value="Heavy Transport"><span><b>Heavy Transport</b><em>Trailers, tippers, tankers…</em></span></label>
+            <label class="card"><input type="radio" name="vendor_type" value="Both"><span><b>Both</b><em>Equipment and transport</em></span></label>
+          </div>
+          <div class="err">Select a vendor type.</div>
+        </div>
+
+        <div class="field" data-req data-group="equipment" id="f_equipment" hidden>
+          <div class="q">Heavy equipment in your inventory<span class="req">*</span><small>select all that apply</small></div>
+          <div class="chips" data-exclusive="None">
+            <label class="chip"><input type="checkbox" name="equipment" value="Boom Loader"><span>Boom Loader</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="Excavator"><span>Excavator</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="Wheel Loader"><span>Wheel Loader</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="Backhoe Loader"><span>Backhoe Loader</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="Bobcat"><span>Bobcat</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="Roller Compactor"><span>Roller Compactor</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="Mobile Crane"><span>Mobile Crane</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="Grader / Dozer"><span>Grader / Dozer</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="Forklift"><span>Forklift</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="Manlift"><span>Manlift</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="Other" data-other="equipment_other"><span>Other</span></label>
+            <label class="chip"><input type="checkbox" name="equipment" value="None"><span>None</span></label>
+          </div>
+          <input type="text" id="equipment_other" placeholder="Which other equipment?" hidden style="margin-top:10px">
+          <div class="err">Select at least one.</div>
+        </div>
+
+        <div class="field" data-req data-group="vehicles" id="f_vehicles" hidden>
+          <div class="q">Heavy vehicles in your inventory<span class="req">*</span><small>select all that apply</small></div>
+          <div class="chips" data-exclusive="None">
+            <label class="chip"><input type="checkbox" name="vehicles" value="Flatbed Trailer"><span>Flatbed Trailer</span></label>
+            <label class="chip"><input type="checkbox" name="vehicles" value="Lowbed Trailer"><span>Lowbed Trailer</span></label>
+            <label class="chip"><input type="checkbox" name="vehicles" value="Hiab Truck"><span>Hiab Truck</span></label>
+            <label class="chip"><input type="checkbox" name="vehicles" value="Tipper Truck"><span>Tipper Truck</span></label>
+            <label class="chip"><input type="checkbox" name="vehicles" value="Water Tanker"><span>Water Tanker</span></label>
+            <label class="chip"><input type="checkbox" name="vehicles" value="Labour Bus"><span>Labour Bus</span></label>
+            <label class="chip"><input type="checkbox" name="vehicles" value="Concrete Mixer"><span>Concrete Mixer</span></label>
+            <label class="chip"><input type="checkbox" name="vehicles" value="Other" data-other="vehicles_other"><span>Other</span></label>
+            <label class="chip"><input type="checkbox" name="vehicles" value="None"><span>None</span></label>
+          </div>
+          <input type="text" id="vehicles_other" placeholder="Which other vehicles?" hidden style="margin-top:10px">
+          <div class="err">Select at least one.</div>
+        </div>
+
+        <div class="field" data-req data-min="1">
+          <label class="q" for="fleet_size">Total fleet size<span class="req">*</span><small>number of units</small></label>
+          <input type="number" id="fleet_size" name="fleet_size" min="1" inputmode="numeric" style="max-width:200px">
+          <div class="err">Enter a number of 1 or more.</div>
+        </div>
+
+        <div class="field" data-req data-group="coverage">
+          <div class="q">Geographic coverage<span class="req">*</span><small>select all that apply</small></div>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" name="coverage" value="Abu Dhabi"><span>Abu Dhabi</span></label>
+            <label class="chip"><input type="checkbox" name="coverage" value="Al Ain"><span>Al Ain</span></label>
+            <label class="chip"><input type="checkbox" name="coverage" value="Dubai"><span>Dubai</span></label>
+            <label class="chip"><input type="checkbox" name="coverage" value="Sharjah"><span>Sharjah</span></label>
+            <label class="chip"><input type="checkbox" name="coverage" value="Ajman"><span>Ajman</span></label>
+            <label class="chip"><input type="checkbox" name="coverage" value="Ras Al Khaimah"><span>Ras Al Khaimah</span></label>
+            <label class="chip"><input type="checkbox" name="coverage" value="Umm Al Quwain"><span>Umm Al Quwain</span></label>
+            <label class="chip"><input type="checkbox" name="coverage" value="Fujairah"><span>Fujairah</span></label>
+          </div>
+          <button type="button" class="linkbtn" id="allUae">Select all emirates</button>
+          <div class="err">Select at least one area.</div>
+        </div>
+      </section>
+
+      <!-- 4. Commercial -->
+      <section class="step" data-title="Commercial terms">
+        <div class="eyebrow">Step 4 of 6</div>
+        <h2>Commercial terms</h2>
+        <p class="sub">How you work and get paid.</p>
+
+        <div class="field" data-req data-group="payment_terms">
+          <div class="q">Payment terms<span class="req">*</span></div>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="payment_terms" value="Advance"><span>Advance</span></label>
+            <label class="chip"><input type="radio" name="payment_terms" value="On completion"><span>On completion</span></label>
+            <label class="chip"><input type="radio" name="payment_terms" value="15 days"><span>15 days</span></label>
+            <label class="chip"><input type="radio" name="payment_terms" value="30 days"><span>30 days</span></label>
+            <label class="chip"><input type="radio" name="payment_terms" value="45 days"><span>45 days</span></label>
+            <label class="chip"><input type="radio" name="payment_terms" value="60 days"><span>60 days</span></label>
+            <label class="chip"><input type="radio" name="payment_terms" value="90 days"><span>90 days</span></label>
+            <label class="chip"><input type="radio" name="payment_terms" value="Other" data-other="payment_terms_other"><span>Other</span></label>
+          </div>
+          <input type="text" id="payment_terms_other" placeholder="Describe your payment terms" hidden style="margin-top:10px">
+          <div class="err">Select your payment terms.</div>
+        </div>
+
+        <div class="field" data-req data-group="delivery_logistics">
+          <div class="q">Can you handle delivery and logistics?<span class="req">*</span><small>fulfilment model</small></div>
+          <div class="cards two">
+            <label class="card"><input type="radio" name="delivery_logistics" value="Yes"><span><b>Yes</b><em>We deliver to site</em></span></label>
+            <label class="card"><input type="radio" name="delivery_logistics" value="No"><span><b>No</b><em>Client arranges pickup</em></span></label>
+          </div>
+          <div class="err">Choose one.</div>
+        </div>
+
+        <div class="field" data-req data-group="payment_methods">
+          <div class="q">Accepted payment methods<span class="req">*</span><small>for payouts &amp; settlements</small></div>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" name="payment_methods" value="Bank Transfer"><span>Bank Transfer</span></label>
+            <label class="chip"><input type="checkbox" name="payment_methods" value="Cheque"><span>Cheque</span></label>
+          </div>
+          <div class="err">Select at least one.</div>
+        </div>
+      </section>
+
+      <!-- 5. Contact -->
+      <section class="step" data-title="Contact & declaration">
+        <div class="eyebrow">Step 5 of 6</div>
+        <h2>Authorized person</h2>
+        <p class="sub">Who we should contact about this registration.</p>
+        <div class="grid2">
+          <div class="field" data-req>
+            <label class="q" for="first_name">First name<span class="req">*</span></label>
+            <input type="text" id="first_name" name="first_name" autocomplete="given-name">
+            <div class="err">Required.</div>
+          </div>
+          <div class="field" data-req>
+            <label class="q" for="last_name">Last name<span class="req">*</span></label>
+            <input type="text" id="last_name" name="last_name" autocomplete="family-name">
+            <div class="err">Required.</div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="q" for="designation">Designation<small>optional</small></label>
+          <input type="text" id="designation" name="designation" placeholder="e.g. Operations Manager" autocomplete="organization-title">
+        </div>
+        <div class="grid2">
+          <div class="field" data-req data-phone>
+            <label class="q" for="phone">Mobile number<span class="req">*</span></label>
+            <div class="phone"><span>+971</span><input type="tel" id="phone" name="phone" placeholder="50 123 4567" autocomplete="tel-national"></div>
+            <div class="err">Enter a valid UAE number (e.g. 50 123 4567).</div>
+          </div>
+          <div class="field" data-req data-email>
+            <label class="q" for="email">Email<span class="req">*</span></label>
+            <input type="email" id="email" name="email" autocomplete="email">
+            <div class="err">Enter a valid email.</div>
+          </div>
+        </div>
+
+        <div class="q" style="margin-top:12px">Declarations<span class="req">*</span></div>
+        <label class="decl" data-decl><input type="checkbox" name="decl_accurate" value="Yes"><span>All information and documents provided are true, accurate and complete, and will be updated promptly if anything changes.</span></label>
+        <label class="decl" data-decl><input type="checkbox" name="decl_laws" value="Yes"><span>The vendor complies with all applicable laws and regulations of the United Arab Emirates.</span></label>
+        <label class="decl" data-decl><input type="checkbox" name="decl_rights" value="Yes"><span>The vendor has the necessary rights and authorizations for the equipment and services listed, including manufacturer authorization where acting as an authorized distributor.</span></label>
+        <div class="err" id="declErr">Please accept all declarations to continue.</div>
+      </section>
+
+      <!-- 6. Review -->
+      <section class="step" data-title="Review & submit">
+        <div class="eyebrow">Step 6 of 6</div>
+        <h2>Review &amp; submit</h2>
+        <p class="sub">Check everything before sending. Click <b>Edit</b> to change a section.</p>
+        <div class="review" id="review"></div>
+        <div class="alert" id="alert"></div>
+      </section>
+
+      <section class="step" id="doneStep" data-title="Done">
+        <div class="done-wrap">
+          <div class="badge"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#141518" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>
+          <h2>Registration received</h2>
+          <p class="sub" style="margin:0 auto;max-width:420px">Thank you. Our vendor team will review your details and get back to you within 2 working days.</p>
+          <div class="ref" id="refOut"></div>
+        </div>
+      </section>
+
+      <div class="nav" id="nav">
+        <button type="button" class="btn ghost" id="back">← Back</button>
+        <button type="button" class="btn primary" id="next">Continue →</button>
+        <span class="kbd">press <kbd>Enter ↵</kbd></span>
+      </div>
+    </form>
+  </main>
+</div>
+
+<script>
+/* If you host this page OUTSIDE Apps Script, paste your web-app /exec URL here. */
+var ENDPOINT = '';
+var DRAFT_KEY = 'kasper_vendor_reg_draft_v1';
+var MAX = 10 * 1024 * 1024;
+
+var form = document.getElementById('f');
+var steps = Array.prototype.slice.call(document.querySelectorAll('section.step')).filter(function(s){return s.id!=='doneStep'});
+var cur = 0, files = {}, maxReached = 0;
+
+/* ---------- step list ---------- */
+var list = document.getElementById('stepList');
+steps.forEach(function(s, i){
+  var li = document.createElement('li');
+  li.innerHTML = '<span class="n">'+(i+1)+'</span>'+s.dataset.title;
+  li.onclick = function(){ if (i <= maxReached && i !== cur) go(i); };
+  list.appendChild(li);
+});
+
+function go(i){
+  steps.forEach(function(s,j){ s.classList.toggle('on', j===i); });
+  document.getElementById('doneStep').classList.remove('on');
+  cur = i; maxReached = Math.max(maxReached, i);
+  Array.prototype.forEach.call(list.children, function(li,j){
+    li.className = j===i ? 'active' : (j<=maxReached && j!==i ? 'done' : '');
+  });
+  document.getElementById('bar').style.width = (i/(steps.length-1)*100)+'%';
+  document.getElementById('back').style.visibility = i===0 ? 'hidden' : 'visible';
+  var n = document.getElementById('next');
+  n.innerHTML = i===steps.length-1 ? 'Submit registration' : 'Continue →';
+  if (i===steps.length-1) buildReview();
+  window.scrollTo({top:0, behavior:'smooth'});
+  var first = steps[i].querySelector('input:not([type=hidden]):not(.hp),select');
+  if (first && window.innerWidth > 900 && i!==steps.length-1) setTimeout(function(){ try{first.focus({preventScroll:true})}catch(e){} }, 250);
+}
+
+/* ---------- values ---------- */
+function val(name){
+  var els = form.querySelectorAll('[name="'+name+'"]');
+  if (!els.length) return '';
+  if (els[0].type === 'checkbox' && els.length > 1 || (els[0].type==='checkbox' && els[0].closest('.chips'))){
+    var out = [];
+    Array.prototype.forEach.call(els, function(e){
+      if (!e.checked) return;
+      if (e.dataset.other){ var t = document.getElementById(e.dataset.other).value.trim(); out.push(t ? 'Other: '+t : 'Other'); }
+      else out.push(e.value);
+    });
+    return out;
+  }
+  if (els[0].type === 'checkbox') return els[0].checked ? els[0].value : '';
+  if (els[0].type === 'radio'){
+    var c = form.querySelector('[name="'+name+'"]:checked');
+    if (!c) return '';
+    if (c.dataset.other){ var t2 = document.getElementById(c.dataset.other).value.trim(); return t2 || 'Other'; }
+    return c.value;
+  }
+  return els[0].value.trim();
+}
+
+function collect(){
+  var d = {};
+  ['company_name','legal_status','trade_license_no','trn','vendor_type','address1','address2','city','po_box','country',
+   'equipment','vehicles','coverage','fleet_size','payment_terms','delivery_logistics','payment_methods',
+   'decl_accurate','decl_laws','decl_rights','first_name','last_name','designation','email','_hp'].forEach(function(k){ d[k]=val(k); });
+  var vt = d.vendor_type;
+  if (vt === 'Heavy Transport') d.equipment = ['N/A'];
+  if (vt === 'Heavy Equipment') d.vehicles = ['N/A'];
+  d.phone = '+971 ' + document.getElementById('phone').value.replace(/\D/g,'').replace(/^0/,'');
+  d.files = files;
+  return d;
+}
+
+/* ---------- validation ---------- */
+function validate(sec){
+  var ok = true, firstBad = null;
+  sec.querySelectorAll('.field').forEach(function(f){
+    if (f.hidden) return;
+    var bad = false, inp = f.querySelector('input:not([type=file]),select');
+    if (f.dataset.group){
+      var v = val(f.dataset.group);
+      if (f.hasAttribute('data-req') && (!v || (Array.isArray(v) && !v.length))) bad = true;
+      var oth = f.querySelector('[data-other]:checked');
+      if (oth && !document.getElementById(oth.dataset.other).value.trim()) bad = true;
+    } else if (f.dataset.file){
+      if (f.hasAttribute('data-req') && !files[f.dataset.file]) bad = true;
+    } else if (inp){
+      var v2 = inp.value.trim();
+      if (f.hasAttribute('data-req') && !v2) bad = true;
+      if (v2 && f.dataset.pattern && !new RegExp(f.dataset.pattern).test(v2)) bad = true;
+      if (v2 && f.hasAttribute('data-email') && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v2)) bad = true;
+      if (v2 && f.hasAttribute('data-phone') && !/^0?5\d{8}$|^0?[2-9]\d{7}$/.test(v2.replace(/\D/g,''))) bad = true;
+      if (v2 && f.dataset.min && (+v2 < +f.dataset.min || !/^\d+$/.test(v2))) bad = true;
+    }
+    f.classList.toggle('invalid', bad);
+    if (bad){ ok = false; firstBad = firstBad || f; }
+  });
+  var decls = sec.querySelectorAll('[data-decl]');
+  if (decls.length){
+    var allOk = true;
+    decls.forEach(function(d){ var c = d.querySelector('input').checked; d.classList.toggle('invalid', !c); if(!c) allOk=false; });
+    document.getElementById('declErr').style.display = allOk ? 'none' : 'block';
+    if (!allOk){ ok = false; firstBad = firstBad || decls[0]; }
+  }
+  if (firstBad) firstBad.scrollIntoView({behavior:'smooth', block:'center'});
+  return ok;
+}
+form.addEventListener('input', function(e){ var f = e.target.closest('.field,.decl'); if (f && f.classList.contains('invalid')) validate(f.closest('section')); saveDraft(); });
+form.addEventListener('change', function(){ saveDraft(); });
+
+/* ---------- conditional + chip behaviours ---------- */
+function syncVendorType(){
+  var v = val('vendor_type');
+  document.getElementById('f_equipment').hidden = !(v==='Heavy Equipment' || v==='Both');
+  document.getElementById('f_vehicles').hidden = !(v==='Heavy Transport' || v==='Both');
+}
+form.querySelectorAll('[name=vendor_type]').forEach(function(r){ r.addEventListener('change', syncVendorType); });
+
+form.querySelectorAll('[data-other]').forEach(function(o){
+  var name = o.name;
+  form.querySelectorAll('[name="'+name+'"]').forEach(function(x){
+    x.addEventListener('change', function(){
+      var t = document.getElementById(o.dataset.other);
+      t.hidden = !o.checked; if (o.checked && x===o) t.focus();
+    });
+  });
+});
+form.querySelectorAll('[data-exclusive]').forEach(function(box){
+  var ex = box.dataset.exclusive;
+  box.addEventListener('change', function(e){
+    var t = e.target; if (!t.checked) return;
+    box.querySelectorAll('input').forEach(function(i){
+      if (t.value===ex ? i!==t : i.value===ex) { i.checked = false; if (i.dataset.other) document.getElementById(i.dataset.other).hidden = true; }
+    });
+  });
+});
+document.getElementById('allUae').onclick = function(){
+  var boxes = form.querySelectorAll('[name=coverage]');
+  var all = Array.prototype.every.call(boxes, function(b){return b.checked});
+  boxes.forEach(function(b){ b.checked = !all; });
+  this.textContent = all ? 'Select all emirates' : 'Clear all';
+  saveDraft();
+};
+document.getElementById('trn').addEventListener('input', function(){ this.value = this.value.replace(/\D/g,''); });
+
+/* ---------- uploads ---------- */
+form.querySelectorAll('[data-file]').forEach(function(f){
+  var key = f.dataset.file, drop = f.querySelector('.drop'), input = drop.querySelector('input'), def = drop.innerHTML;
+  function setFile(file){
+    if (!file) return;
+    var okType = /\.(pdf|jpe?g|png)$/i.test(file.name);
+    if (!okType || file.size > MAX){ f.classList.add('invalid'); f.querySelector('.err').textContent = !okType ? 'Only PDF, JPG or PNG files.' : 'File is larger than 10 MB.'; return; }
+    var r = new FileReader();
+    r.onload = function(){
+      files[key] = { name:file.name, type:file.type, data:String(r.result).split(',')[1] };
+      drop.classList.add('has'); f.classList.remove('invalid');
+      drop.querySelector('.ic').textContent = '✓';
+      drop.querySelector('.t').innerHTML = '<b></b><em>'+(file.size/1024/1024).toFixed(2)+' MB · click to replace</em>';
+      drop.querySelector('.t b').textContent = file.name;
+      if (!drop.querySelector('.x')){
+        var x = document.createElement('button'); x.type='button'; x.className='x'; x.innerHTML='×'; x.title='Remove';
+        x.onclick = function(ev){ ev.preventDefault(); ev.stopPropagation(); delete files[key]; drop.classList.remove('has'); drop.innerHTML = def; bind(); };
+        drop.appendChild(x);
+      }
+    };
+    r.readAsDataURL(file);
+  }
+  function bind(){ input = drop.querySelector('input'); input.onchange = function(){ setFile(input.files[0]); input.value=''; }; }
+  bind();
+  ['dragenter','dragover'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add('over'); }); });
+  ['dragleave','drop'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove('over'); }); });
+  drop.addEventListener('drop', function(e){ setFile(e.dataTransfer.files[0]); });
+});
+
+/* ---------- review ---------- */
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}); }
+function buildReview(){
+  var d = collect(), show = function(v){ return Array.isArray(v) ? v.join(', ') : v; };
+  var groups = [
+    [0,'Company',[['Legal name',d.company_name],['Legal status',d.legal_status],['Trade license no.',d.trade_license_no],['TRN',d.trn],['Trade license',files.trade_license&&files.trade_license.name],['VAT certificate',files.vat_cert&&files.vat_cert.name]]],
+    [1,'Address',[['Address',[d.address1,d.address2].filter(Boolean).join(', ')],['Emirate',d.city],['P.O. Box',d.po_box],['Country',d.country]]],
+    [2,'Fleet & coverage',[['Vendor type',d.vendor_type],['Heavy equipment',show(d.equipment)],['Heavy vehicles',show(d.vehicles)],['Fleet size',d.fleet_size],['Coverage',show(d.coverage)]]],
+    [3,'Commercial',[['Payment terms',d.payment_terms],['Delivery & logistics',d.delivery_logistics],['Payment methods',show(d.payment_methods)]]],
+    [4,'Authorized person',[['Name',d.first_name+' '+d.last_name],['Designation',d.designation],['Mobile',d.phone],['Email',d.email],['Declarations','All accepted']]]
+  ];
+  document.getElementById('review').innerHTML = groups.map(function(g){
+    return '<div class="grp"><div class="gh"><b>'+g[1]+'</b><button type="button" class="linkbtn" style="margin:0" data-go="'+g[0]+'">Edit</button></div><dl>'+
+      g[2].filter(function(r){return r[1] && r[1]!=='N/A'}).map(function(r){return '<dt>'+r[0]+'</dt><dd>'+esc(r[1])+'</dd>'}).join('')+'</dl></div>';
+  }).join('');
+  document.querySelectorAll('[data-go]').forEach(function(b){ b.onclick = function(){ go(+b.dataset.go); }; });
+}
+
+/* ---------- submit ---------- */
+function submit(){
+  var btn = document.getElementById('next'), alertEl = document.getElementById('alert');
+  for (var i=0;i<steps.length-1;i++){ if (!validate(steps[i])){ go(i); validate(steps[i]); return; } }
+  btn.disabled = true; btn.textContent = 'Submitting…'; alertEl.style.display='none';
+  var data = collect();
+  function done(res){
+    if (!res || !res.ok){ return fail(res && res.error); }
+    try{ localStorage.removeItem(DRAFT_KEY); }catch(e){}
+    steps.forEach(function(s){ s.classList.remove('on'); });
+    document.getElementById('doneStep').classList.add('on');
+    document.getElementById('nav').style.display='none';
+    document.getElementById('bar').style.width='100%';
+    Array.prototype.forEach.call(list.children, function(li){ li.className='done'; });
+    document.getElementById('refOut').textContent = 'Reference: ' + res.ref;
+  }
+  function fail(msg){
+    btn.disabled = false; btn.textContent = 'Submit registration';
+    alertEl.textContent = 'Could not submit: ' + (msg || 'network error') + '. Please try again.';
+    alertEl.style.display = 'block';
+  }
+  if (window.google && google.script && google.script.run){
+    google.script.run.withSuccessHandler(done).withFailureHandler(function(e){ fail(e && e.message); }).submit(data);
+  } else if (ENDPOINT){
+    fetch(ENDPOINT, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(data) })
+      .then(function(r){ return r.json(); }).then(done).catch(function(e){ fail(e.message); });
+  } else {
+    console.log('Preview mode — no backend connected. Payload:', data);
+    setTimeout(function(){ done({ ok:true, ref:'PREVIEW-0001' }); }, 700);
+  }
+}
+
+/* ---------- nav ---------- */
+document.getElementById('next').onclick = function(){
+  if (cur === steps.length-1) return submit();
+  if (validate(steps[cur])) go(cur+1);
+};
+document.getElementById('back').onclick = function(){ if (cur>0) go(cur-1); };
+form.addEventListener('keydown', function(e){
+  if (e.key==='Enter' && e.target.tagName!=='TEXTAREA' && e.target.tagName!=='BUTTON'){ e.preventDefault(); document.getElementById('next').click(); }
+});
+
+/* ---------- draft autosave (text fields only; files are not kept) ---------- */
+function saveDraft(){
+  try{
+    var d = {};
+    form.querySelectorAll('input:not([type=file]):not(.hp),select').forEach(function(el){
+      var k = el.name || el.id; if (!k) return;
+      if (el.type==='checkbox' || el.type==='radio'){ if (el.checked) (d[k]=d[k]||[]).push(el.value); }
+      else d[k] = el.value;
+    });
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
+  }catch(e){}
+}
+function loadDraft(){
+  try{
+    var d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); if (!d) return;
+    form.querySelectorAll('input:not([type=file]):not(.hp),select').forEach(function(el){
+      var k = el.name || el.id; if (!(k in d)) return;
+      if (el.type==='checkbox' || el.type==='radio') el.checked = d[k].indexOf(el.value) > -1;
+      else el.value = d[k];
+    });
+    form.querySelectorAll('[data-other]').forEach(function(o){ document.getElementById(o.dataset.other).hidden = !o.checked; });
+    syncVendorType();
+  }catch(e){}
+}
+
+loadDraft();
+go(0);
+</script>
+</body>
+</html>
